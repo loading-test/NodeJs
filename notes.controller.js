@@ -10,6 +10,7 @@ async function addNote(title) {
     title,
     id: Date.now().toString()
   }
+
   notes.push(note)
 
   await saveNotes(notes)
@@ -36,25 +37,23 @@ async function printNotes() {
 
 async function removeNote(id) {
   const notes = await getNotes()
+
   const filtered = notes.filter(note => note.id !== id)
 
   await saveNotes(filtered)
   console.log(chalk.red(`Note with id="${id}" has been removed.`))
 }
 
-async function editNote(id, body) {
+async function updateNote(noteData) {
   const notes = await getNotes()
-  const indexNote = notes.findIndex(n => n.id === id)
-  if (indexNote === -1) {
-    
-    return 
-  };
-  notes[indexNote] = { ...notes[indexNote], title: body.title }
-  await fs.writeFile(notesPath, JSON.stringify(notes))
-  console.log('Запись успешно изменена.');
-
+  const index = notes.findIndex(note => note.id === noteData.id)
+  if (index >= 0) {
+    notes[index] = { ...notes[index], ...noteData }
+    await saveNotes(notes)
+    console.log(chalk.bgGreen(`Note with id="${noteData.id}" has been updated!`))
+  }
 }
 
 module.exports = {
-  addNote, getNotes, removeNote, editNote
+  addNote, getNotes, removeNote, updateNote
 }
